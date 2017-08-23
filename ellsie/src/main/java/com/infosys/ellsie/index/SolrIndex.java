@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBElement;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
@@ -22,15 +20,19 @@ import com.infosys.ellsie.connection.SolrConnection;
 import com.infosys.ellsie.data.arxiv.ArXivType;
 import com.infosys.ellsie.data.arxiv.AuthorType;
 import com.infosys.ellsie.data.arxiv.AuthorsType;
-import com.infosys.ellsie.main.Indexer;
 
 public class SolrIndex {
-	private static final Logger LOG = LoggerFactory.getLogger(Indexer.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SolrIndex.class);
 	private HttpSolrClient solrClient = SolrConnection.INSTANCE.getSolr();
 
-	public SolrIndex(Map<String, Object> fieldAttribs) throws SolrServerException, IOException {
-		UpdateResponse response = createMetadataSchema(fieldAttribs);
-		LOG.info("field updated: " , response);
+	public SolrIndex(ArxivSchema schema) throws SolrServerException, IOException {
+		schema.getAllfields().stream().forEach(field -> {
+			try {
+				LOG.info("field updated: {}" , createMetadataSchema(field));
+			} catch (SolrServerException | IOException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		});
 	}
 
 	public SolrIndex() {
@@ -52,9 +54,9 @@ public class SolrIndex {
 
 	public void addArxMetadata(ArXivType arx) throws SolrServerException, IOException {
 		SolrInputDocument solrDoc = new SolrInputDocument();
-
-		// authors type
-		for (JAXBElement<?> element : arx.getIdOrCreatedOrUpdated()) {
+		
+		arx.getIdOrCreatedOrUpdated().parallelStream()
+		.forEach(element -> {
 			if (element.getName().getLocalPart().equals("authors")) {
 				AuthorsType authors = (AuthorsType) element.getValue();
 				for (AuthorType author : authors.getAuthor()) {
@@ -69,8 +71,9 @@ public class SolrIndex {
 			} else {
 				solrDoc.addField(element.getName().getLocalPart(), element.getValue());
 			}
-		}
-		LOG.info("Added: " , solrClient.add(solrDoc));
+		});
+		
+		LOG.info("Added: {}" , solrClient.add(solrDoc));
 		solrClient.commit();
 	}
 

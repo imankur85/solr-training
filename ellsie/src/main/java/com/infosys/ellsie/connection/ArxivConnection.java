@@ -8,6 +8,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.infosys.ellsie.util.Constants;
 
 import okhttp3.Authenticator;
@@ -20,6 +23,8 @@ import okhttp3.Response;
 import okhttp3.Route;
 
 public class ArxivConnection {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ArxivConnection.class);
 
 	private OkHttpClient client;
 
@@ -57,7 +62,7 @@ public class ArxivConnection {
 						response = chain.proceed(request);
 						responseOK = response.isSuccessful();
 					} catch (Exception e) {
-						System.out.println("intercept:" + "Request is not successful - " + tryCount);
+						LOG.info("intercept: Request is not successful - {}" + tryCount);
 					} finally {
 						tryCount++;
 					}
@@ -83,7 +88,7 @@ public class ArxivConnection {
 		HttpUrl url = listUrl.newBuilder().addQueryParameter("from", df.format(fromDate))
 				.addQueryParameter("until", df.format(toDate)).build();
 
-		System.out.println("Querying repository: " + url);
+		LOG.info("Querying repository: {}" , url);
 
 		Request request = new Request.Builder().url(url).build();
 
@@ -94,7 +99,7 @@ public class ArxivConnection {
 
 	public String getListIdentifiers() throws IOException {
 
-		System.out.println("Querying repository: " + listUrl);
+		LOG.info("Querying repository: {}" , listUrl);
 
 		Request request = new Request.Builder().url(listUrl).build();
 
@@ -106,7 +111,7 @@ public class ArxivConnection {
 	public String getRecord(String identifier) throws IOException {
 		HttpUrl url = this.getUrl.newBuilder().addQueryParameter("identifier", identifier).build();
 
-		System.out.println("Querying repository: " + url);
+		LOG.info("Querying repository: {}" , url);
 
 		Request request = new Request.Builder().url(url).build();
 
