@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.ForkJoinPool;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -43,12 +44,19 @@ public class Indexer {
 		XmlParser parser = new XmlParser();
 		SolrIndex index = new SolrIndex(new ArxivSchema());
 		// FileDocument fileDoc = new FileDocument();
+		
 
-		Files.list(Paths.get("d:/sundeep/arxiv/")).parallel().forEach(path -> {
+		new ForkJoinPool(2).submit( () -> {
 			try {
-				//URLDecoder.decode(path., arg1)
-				indexListRecordViaSolrDoc(parser, index, new File(path.toUri().getRawPath()));
-			} catch (JAXBException e) {
+				Files.list(Paths.get("d:/sundeep/arxiv/")).parallel().forEach(path -> {
+					try {
+						//URLDecoder.decode(path., arg1)
+						indexListRecordViaSolrDoc(parser, index, new File(path.toUri().getRawPath()));
+					} catch (JAXBException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				});
+			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		});

@@ -40,7 +40,8 @@ public class RestClient {
 		payload.put("key1","value1");
 		payload.put("key2","value2");
 
-		String jsonRequest = new ObjectMapper().writeValueAsString(payload);
+		//String jsonRequest = new ObjectMapper().writeValueAsString(payload);
+		String jsonRequest = null;
 		LOG.info(jsonRequest);
 		
 		
