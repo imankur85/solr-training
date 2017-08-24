@@ -46,8 +46,8 @@ public class Indexer {
 
 		Files.list(Paths.get("d:/sundeep/arxiv/")).parallel().forEach(path -> {
 			try {
-				path.
-				indexListRecordViaSolrDoc(parser, index, path.toFile());
+				//URLDecoder.decode(path., arg1)
+				indexListRecordViaSolrDoc(parser, index, new File(path.toUri().getRawPath()));
 			} catch (JAXBException e) {
 				LOG.error(e.getMessage(), e);
 			}
