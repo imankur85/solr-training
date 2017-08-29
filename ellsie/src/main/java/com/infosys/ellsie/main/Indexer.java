@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
 import javax.xml.bind.JAXBElement;
@@ -19,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.infosys.ellsie.data.arxiv.ArXivType;
 import com.infosys.ellsie.data.oaipmh.OAIPMHtype;
 import com.infosys.ellsie.data.parser.XmlParser;
-import com.infosys.ellsie.index.ArxivSchema;
 import com.infosys.ellsie.index.SolrIndex;
 
 /**
@@ -37,20 +37,20 @@ public class Indexer {
 	 * @throws JAXBException
 	 * @throws IOException
 	 * @throws SolrServerException
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
 	 */
-	public static void main(String[] args) throws JAXBException, SolrServerException, IOException {
+	public static void main(String[] args) throws JAXBException, SolrServerException, IOException, InterruptedException, ExecutionException {
 
 		// index all meta data XMLs
 		XmlParser parser = new XmlParser();
-		SolrIndex index = new SolrIndex(new ArxivSchema());
+		SolrIndex index = new SolrIndex();
 		// FileDocument fileDoc = new FileDocument();
-		
 
-		new ForkJoinPool(2).submit( () -> {
+		new ForkJoinPool(2).submit(() -> {
 			try {
-				Files.list(Paths.get("d:/sundeep/arxiv/")).parallel().forEach(path -> {
+				Files.list(Paths.get("D:/arxiv/arxiv/")).parallel().forEach(path -> {
 					try {
-						//URLDecoder.decode(path., arg1)
 						indexListRecordViaSolrDoc(parser, index, new File(path.toUri().getRawPath()));
 					} catch (JAXBException e) {
 						LOG.error(e.getMessage(), e);
@@ -59,14 +59,13 @@ public class Indexer {
 			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
 			}
-		});
-
-		/*
-		 * for (File xmlFile : Files.list(Paths.get("d:/sundeep/arxiv/"))) {
-		 * //indexGetRecordViaSolrDoc(parser, index, xmlFile);
-		 * indexListRecordViaSolrDoc(parser, index, xmlFile); //
-		 * indexViaStream(fileDoc, index, xmlFile); }
-		 */
+		}).get();
+		
+		
+		// check and commit if docs are remaining
+		if (!index.getSolrDocs().isEmpty()) {
+			index.commitDocs(index.getSolrDocs());
+		}
 
 	}
 
@@ -75,14 +74,20 @@ public class Indexer {
 			throws JAXBException {
 
 		OAIPMHtype oaiType = parser.xmlToObject(xmlFile);
-		oaiType.getListRecords().getRecord().parallelStream().forEach(record -> {
-			ArXivType arx = ((JAXBElement<ArXivType>) (record.getMetadata().getAny())).getValue();
-			try {
-				LOG.info("Adding file: {} ", xmlFile.getName());
-				index.addArxMetadata(arx);
-			} catch (SolrServerException | IOException e) {
-				LOG.error(e.getMessage(), e);
+		LOG.info("Adding file: {} ", xmlFile.getName());
+		oaiType.getListRecords().getRecord().stream().forEach(record -> {
+			if (null != record.getMetadata() && null != record.getMetadata().getAny()) {
+				ArXivType arx = ((JAXBElement<ArXivType>) (record.getMetadata().getAny())).getValue();
+				try {
+					index.addArxMetadata(arx);
+				} catch (SolrServerException | IOException e) {
+					LOG.error(e.getMessage(), e);
+				}
+				
+			} else {
+				LOG.error("skipped record in: {}", xmlFile.getName());
 			}
+			
 		});
 
 	}

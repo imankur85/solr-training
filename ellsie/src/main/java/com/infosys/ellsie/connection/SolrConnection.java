@@ -6,7 +6,7 @@ import org.apache.solr.client.solrj.impl.XMLResponseParser;
 public enum SolrConnection {
 	INSTANCE;
 	//private String urlString = "http://localhost:8983/solr/ellsie-training";
-	private String urlString = "http://localhost:8983/solr/arxiv-training";
+	private String urlString = "http://localhost:8983/solr/arxiv-multi";
 	private HttpSolrClient solr = new HttpSolrClient.Builder(urlString).build();
 	
 	SolrConnection() {
