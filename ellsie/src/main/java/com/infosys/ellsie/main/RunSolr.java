@@ -7,7 +7,7 @@ import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.common.util.NamedList;
 
 import com.infosys.ellsie.document.FileDocument;
-import com.infosys.ellsie.index.SolrIndex;
+import com.infosys.ellsie.index.SolrIndexHelper;
 
 /**
  * Main program to run
@@ -19,7 +19,7 @@ public class RunSolr {
 	public static void main (String ar[]) {
 		
 		FileDocument file = new FileDocument();
-		SolrIndex index = new SolrIndex();
+		SolrIndexHelper index = new SolrIndexHelper();
 		
 		try {
 			ContentStreamUpdateRequest createDoc = file.createDoc(new File("NLPSearch_Mentoring_scopeV1.pdf"), "pdf");

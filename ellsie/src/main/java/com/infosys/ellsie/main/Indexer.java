@@ -20,7 +20,9 @@ import org.slf4j.LoggerFactory;
 import com.infosys.ellsie.data.arxiv.ArXivType;
 import com.infosys.ellsie.data.oaipmh.OAIPMHtype;
 import com.infosys.ellsie.data.parser.XmlParser;
-import com.infosys.ellsie.index.SolrIndex;
+import com.infosys.ellsie.index.SolrIndexHelper;
+import com.infosys.ellsie.util.ConfigLoaderFactory;
+import com.infosys.ellsie.util.Configuration;
 
 /**
  * Main executor
@@ -37,22 +39,25 @@ public class Indexer {
 	 * @throws JAXBException
 	 * @throws IOException
 	 * @throws SolrServerException
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 */
-	public static void main(String[] args) throws JAXBException, SolrServerException, IOException, InterruptedException, ExecutionException {
+	public static void main(String[] args)
+			throws JAXBException, SolrServerException, IOException, InterruptedException, ExecutionException {
 
-		// index all meta data XMLs
+		// load config
+		final Configuration config = ConfigLoaderFactory.loadConfig(args[0]);
+
 		XmlParser parser = new XmlParser();
-		SolrIndex index = new SolrIndex();
-		// FileDocument fileDoc = new FileDocument();
-
-		new ForkJoinPool(2).submit(() -> {
+		SolrIndexHelper index = new SolrIndexHelper();
+		
+		// multi-threaded fork join pool
+		new ForkJoinPool(config.getThreadPoolSize()).submit(() -> {
 			try {
-				Files.list(Paths.get("D:/arxiv/arxiv/")).parallel().forEach(path -> {
+				Files.list(Paths.get(config.getReadFilePath())).parallel().forEach(path -> {
 					try {
 						indexListRecordViaSolrDoc(parser, index, new File(path.toUri().getRawPath()));
-					} catch (JAXBException e) {
+					} catch (JAXBException | SolrServerException | IOException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				});
@@ -60,8 +65,7 @@ public class Indexer {
 				LOG.error(e.getMessage(), e);
 			}
 		}).get();
-		
-		
+
 		// check and commit if docs are remaining
 		if (!index.getSolrDocs().isEmpty()) {
 			index.commitDocs(index.getSolrDocs());
@@ -69,28 +73,13 @@ public class Indexer {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private static void indexListRecordViaSolrDoc(XmlParser parser, SolrIndex index, File xmlFile)
-			throws JAXBException {
-
+	private static void indexListRecordViaSolrDoc(XmlParser parser, SolrIndexHelper index, File xmlFile) throws JAXBException, SolrServerException, IOException {
+		
 		OAIPMHtype oaiType = parser.xmlToObject(xmlFile);
 		LOG.info("Adding file: {} ", xmlFile.getName());
-		oaiType.getListRecords().getRecord().stream().forEach(record -> {
-			if (null != record.getMetadata() && null != record.getMetadata().getAny()) {
-				ArXivType arx = ((JAXBElement<ArXivType>) (record.getMetadata().getAny())).getValue();
-				try {
-					index.addArxMetadata(arx);
-				} catch (SolrServerException | IOException e) {
-					LOG.error(e.getMessage(), e);
-				}
-				
-			} else {
-				LOG.error("skipped record in: {}", xmlFile.getName());
-			}
-			
-		});
-
+		index.processOAIType(oaiType);
 	}
+
 
 	/*
 	 * private static void indexViaStream(FileDocument fileDoc, SolrIndex index,
@@ -101,7 +90,7 @@ public class Indexer {
 	 */
 
 	@SuppressWarnings("unused")
-	private static void indexGetRecordViaSolrDoc(XmlParser parser, SolrIndex index, File xmlFile)
+	private static void indexGetRecordViaSolrDoc(XmlParser parser, SolrIndexHelper index, File xmlFile)
 			throws JAXBException, SolrServerException, IOException {
 		OAIPMHtype oaiType = parser.xmlToObject(xmlFile);
 		@SuppressWarnings("unchecked")

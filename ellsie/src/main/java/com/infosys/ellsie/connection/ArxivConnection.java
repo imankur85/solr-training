@@ -11,7 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.infosys.ellsie.util.Constants;
+import com.infosys.ellsie.util.ConfigLoaderFactory;
+import com.infosys.ellsie.util.Configuration;
 
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
@@ -24,22 +25,22 @@ import okhttp3.Route;
 
 public class ArxivConnection {
 	
+	private final Configuration config = ConfigLoaderFactory.getConfig();
+
 	private static final Logger LOG = LoggerFactory.getLogger(ArxivConnection.class);
 
 	private OkHttpClient client;
 
-	private HttpUrl listUrl = new HttpUrl.Builder().scheme("http").host("export.arxiv.org").addPathSegment("oai2")
+	private HttpUrl listUrl = new HttpUrl.Builder().scheme("http").host(config.getArxivURL()).addPathSegment("oai2")
 			.addQueryParameter("metadataPrefix", "arXiv").addQueryParameter("verb", "ListIdentifiers").build();
 
-	private HttpUrl getUrl = new HttpUrl.Builder().scheme("http").host("export.arxiv.org").addPathSegment("oai2")
+	private HttpUrl getUrl = new HttpUrl.Builder().scheme("http").host(config.getArxivURL()).addPathSegment("oai2")
 			.addQueryParameter("metadataPrefix", "arXiv").addQueryParameter("verb", "GetRecord").build();
 
-	public ArxivConnection() {
+	public ArxivConnection(String username, String password) {
 
-		int proxyPort = 80;
-		String proxyHost = "10.68.248.102";
-		final String username = Constants.USERNAME;
-		final String password = Constants.PASSWORD;
+		int proxyPort = config.getProxyPort();
+		String proxyHost = config.getProxyHost();
 
 		Authenticator proxyAuthenticator = new Authenticator() {
 			public Request authenticate(Route route, Response response) throws IOException {
