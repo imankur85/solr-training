@@ -1,9 +1,10 @@
 # Connection parameters
 readFilePath: D:/arxiv/arxiv/
 threadPoolSize: 2
-fileBatchSize: 2000
+fileBatchSize: 1000
 writeFilePath: d:/arxiv2
 arxivURL: export.arxiv.org
 proxyHost: 10.68.248.102
 proxyPort: 80
-commitInMs: 15000
+commitInMs: 10000
+sparkUrl: local

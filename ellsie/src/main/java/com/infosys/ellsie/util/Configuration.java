@@ -18,6 +18,8 @@ public final class Configuration {
 	
 	private int commitInMs = 10000;
 
+	private String sparkUrl;
+
 	public String getReadFilePath() {
 		return readFilePath;
 	}
@@ -80,6 +82,14 @@ public final class Configuration {
 
 	public void setCommitInMs(int commitInMs) {
 		this.commitInMs = commitInMs;
+	}
+
+	public String getSparkUrl() {
+		return sparkUrl;
+	}
+	
+	public void setSparkUrl(String url) {
+		sparkUrl = url;
 	}
 	
 }
