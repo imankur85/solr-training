@@ -3,10 +3,11 @@
  */
 package com.infosys.ellsie.connection;
 
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaSparkContext;
 
+import com.infosys.ellsie.model.Configuration;
 import com.infosys.ellsie.util.ConfigLoaderFactory;
-import com.infosys.ellsie.util.Configuration;
 
 /**
  * @author Ankur_Jain22
@@ -14,23 +15,22 @@ import com.infosys.ellsie.util.Configuration;
  */
 public class SparkConnection {
 	
-	private SparkSession sparkSession ;
+	private SparkConf sparkConf ;
+	private JavaSparkContext javaSparkSc; 
 	
 	private Configuration config = ConfigLoaderFactory.getConfig();
 	
 	public SparkConnection() {
-		setSparkSession(SparkSession.builder()
-				.appName("Arxiv Training")
-				.master(config.getSparkUrl())
-				.getOrCreate());
+		sparkConf = new SparkConf().setAppName("Arxiv Training").setMaster(config.getSparkUrl());
+		javaSparkSc = new JavaSparkContext(sparkConf);
 	}
 
-	public SparkSession getSparkSession() {
-		return sparkSession;
+	public JavaSparkContext getSparkSession() {
+		return javaSparkSc;
 	}
 
-	public void setSparkSession(SparkSession sparkSession) {
-		this.sparkSession = sparkSession;
+	public void setSparkSession(JavaSparkContext javaSparkSc) {
+		this.javaSparkSc = javaSparkSc;
 	}
 	
 }

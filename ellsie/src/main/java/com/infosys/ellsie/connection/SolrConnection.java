@@ -6,18 +6,14 @@ import org.apache.solr.client.solrj.impl.XMLResponseParser;
 
 public enum SolrConnection {
 	INSTANCE;
-	private String urlString = "http://localhost:8983/solr/arxiv-training";
-	private HttpSolrClient solr = new HttpSolrClient.Builder(urlString).build();
+	private HttpSolrClient solr = new HttpSolrClient.Builder().withBaseSolrUrl("").build();
 	//private ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient.Builder(urlString).withQueueSize(20000).withThreadCount(10).build();
 	
-	SolrConnection() {
+	public SolrClient getSolr(String url) {
+		solr.setBaseURL(url);
 		solr.setParser(new XMLResponseParser());
 		solr.setMaxTotalConnections(4);
-	}
-	
-	public SolrClient getSolr() {
 		return solr;
 	}
 	
-
 }

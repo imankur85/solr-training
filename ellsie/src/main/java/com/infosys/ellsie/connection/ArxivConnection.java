@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.infosys.ellsie.model.Configuration;
 import com.infosys.ellsie.util.ConfigLoaderFactory;
-import com.infosys.ellsie.util.Configuration;
 
 import okhttp3.Authenticator;
 import okhttp3.Credentials;

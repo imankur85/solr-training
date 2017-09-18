@@ -27,6 +27,20 @@ public class XmlParser {
 	private static final Logger LOG = LoggerFactory.getLogger(XmlParser.class);
 	private static JAXBContext context;
 	
+	private static XmlParser parser;
+	
+	public static XmlParser getInstance() {
+		if (null == parser) {
+			return new XmlParser();
+		} else {
+			return parser;
+		}
+	}
+	
+	private XmlParser() {
+		
+	}
+	
 	static {
 		try {
 			context = JAXBContext.newInstance(OAIPMHtype.class, ArXivType.class);
@@ -43,6 +57,7 @@ public class XmlParser {
         return oaiElement.getValue();
 	}
 
+	@SuppressWarnings("unchecked")
 	public OAIPMHtype xmlToObject(String content) throws JAXBException {
 		Unmarshaller un = context.createUnmarshaller();
 		StringReader reader = new StringReader(content);

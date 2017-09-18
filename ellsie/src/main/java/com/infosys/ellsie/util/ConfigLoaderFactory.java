@@ -3,6 +3,9 @@
  */
 package com.infosys.ellsie.util;
 
+import com.infosys.ellsie.model.ConfigLoader;
+import com.infosys.ellsie.model.Configuration;
+
 /**
  * @author Ankur_Jain22
  *

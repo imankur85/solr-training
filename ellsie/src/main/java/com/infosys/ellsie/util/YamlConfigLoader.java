@@ -5,10 +5,16 @@ package com.infosys.ellsie.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+
+import com.infosys.ellsie.model.ConfigLoader;
+import com.infosys.ellsie.model.Configuration;
 
 /**
  * @author Ankur_Jain22
@@ -35,8 +41,8 @@ public class YamlConfigLoader implements ConfigLoader {
 	 */
 	@Override
 	public Configuration getConfig() {
-		Yaml yaml = new Yaml();
-		try (InputStream in = getClass().getClassLoader().getResource(filePath).openStream()) {
+		Yaml yaml = new Yaml(new Constructor(Configuration.class));
+		try (InputStream in = Files.newInputStream(Paths.get(filePath))) {
 			config = yaml.loadAs(in, Configuration.class);
 		} catch (IOException e) {
 			LOG.error("Error reading config file: {} {}", filePath, e);

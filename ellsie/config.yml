@@ -1,0 +1,21 @@
+---
+# Jobs and tasks
+jobs:
+    #com.infosys.ellsie.model.jobs.Harvestor: 
+     #   - com.infosys.ellsie.model.tasks.Downloader 
+    com.infosys.ellsie.model.jobs.Indexer: 
+        - com.infosys.ellsie.model.tasks.DataProcessor
+
+# Connection parameters
+readFilePath: "D:/arxiv/arxiv/"
+threadPoolSize: 2
+fileBatchSize: 1000
+writeFilePath: "d:/arxiv2"
+arxivURL: export.arxiv.org
+proxyHost: 10.68.248.102
+proxyPort: 80
+commitInMs: 10000
+sparkUrl: local
+solrUrl: http://localhost:8983/solr/arxiv-training
+hdfsUrl: hdfs://10.188.49.222:9000/arxiv_data/arxiv/*init.xml
+rddPartitions: 10

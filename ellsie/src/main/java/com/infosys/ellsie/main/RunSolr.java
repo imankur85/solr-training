@@ -6,8 +6,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.common.util.NamedList;
 
-import com.infosys.ellsie.document.FileDocument;
-import com.infosys.ellsie.index.SolrIndexHelper;
+import com.infosys.ellsie.model.FileDocument;
+import com.infosys.ellsie.util.SolrIndexHelper;
 
 /**
  * Main program to run
